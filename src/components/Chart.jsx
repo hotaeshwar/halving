@@ -4,7 +4,7 @@ export default function BitcoinPresentation() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [visibleItems, setVisibleItems] = useState(0);
   const [visibleNodes, setVisibleNodes] = useState(0);
-  const [isMuted, setIsMuted] = useState(true); // Start muted to comply with autoplay policies
+  const [isMuted, setIsMuted] = useState(true);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const audioRef = useRef(null);
@@ -14,21 +14,19 @@ export default function BitcoinPresentation() {
     const handleUserInteraction = () => {
       setUserInteracted(true);
       if (audioRef.current && isAudioLoaded) {
-        // Unmute and play when user interacts
         audioRef.current.muted = false;
         setIsMuted(false);
         const playPromise = audioRef.current.play();
         
         if (playPromise !== undefined) {
           playPromise.catch(err => {
-            console.log('Audio play failed after interaction:', err);
+            console.log('Audio play failed:', err);
           });
         }
       }
     };
 
-    // Listen for various user interactions
-    const events = ['click', 'touchstart', 'keydown', 'mousedown'];
+    const events = ['click', 'touchstart', 'keydown'];
     events.forEach(event => {
       document.addEventListener(event, handleUserInteraction, { 
         once: true,
@@ -50,37 +48,21 @@ export default function BitcoinPresentation() {
       
       const handleCanPlay = () => {
         setIsAudioLoaded(true);
-        console.log('✅ Audio loaded successfully');
       };
 
       const handleError = (e) => {
-        console.error('❌ Audio loading error:', audio.error);
-        console.log('🔍 Audio source path:', audio.src);
-        
-        // Try alternative path
-        if (!audio.src.includes('/audio/')) {
-          console.log('🔄 Trying alternative audio path...');
-          audio.src = '/audio/background-music.mp3';
-          audio.load();
-        }
-      };
-
-      const handlePlay = () => {
-        console.log('🎵 Audio started playing');
+        console.error('Audio loading error:', audio.error);
       };
 
       audio.addEventListener('canplay', handleCanPlay);
       audio.addEventListener('error', handleError);
-      audio.addEventListener('play', handlePlay);
 
-      // Preload the audio
       audio.preload = 'auto';
       audio.load();
 
       return () => {
         audio.removeEventListener('canplay', handleCanPlay);
         audio.removeEventListener('error', handleError);
-        audio.removeEventListener('play', handlePlay);
       };
     }
   }, []);
@@ -91,7 +73,6 @@ export default function BitcoinPresentation() {
       audioRef.current.muted = newMutedState;
       setIsMuted(newMutedState);
       
-      // If unmuting and user hasn't interacted, try to play
       if (!newMutedState && !userInteracted) {
         setUserInteracted(true);
         const playPromise = audioRef.current.play();
@@ -99,7 +80,6 @@ export default function BitcoinPresentation() {
         if (playPromise !== undefined) {
           playPromise.catch(err => {
             console.log('Play on unmute failed:', err);
-            // If play fails, keep it muted
             audioRef.current.muted = true;
             setIsMuted(true);
           });
@@ -176,27 +156,16 @@ export default function BitcoinPresentation() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 flex items-center justify-center p-3 sm:p-4 md:p-6">
-      {/* Audio Player with multiple sources and better error handling */}
+      {/* Audio Player */}
       <audio
         ref={audioRef}
         loop
-        muted={true} // Start muted to comply with autoplay policies
+        muted={true}
         preload="auto"
       >
-        {/* Try multiple sources in order */}
         <source src="/audio/background-music.mp3" type="audio/mpeg" />
-        <source src="/images/Inspiring and Uplifting Background Music For Videos & Presentations.mp3" type="audio/mpeg" />
-        <source src="/public/audio/background-music.mp3" type="audio/mpeg" />
         Your browser does not support the audio element.
       </audio>
-
-      {/* Audio Status Indicator */}
-      <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
-        <div className={`w-3 h-3 rounded-full ${isAudioLoaded ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`} />
-        <span className="text-xs text-slate-300">
-          {isAudioLoaded ? 'Audio Ready' : 'Loading Audio...'}
-        </span>
-      </div>
 
       {/* Mute/Unmute Button */}
       <button
@@ -243,11 +212,15 @@ export default function BitcoinPresentation() {
             <div className="flex flex-col items-center justify-center min-h-[500px] sm:min-h-[600px] transition-opacity duration-500">
               <div className="text-center space-y-6 sm:space-y-8">
                 <div className="flex justify-center mb-6 sm:mb-8">
-                  <img 
-                    src="/images/logo.png" 
-                    alt="Logo" 
-                    className="h-20 sm:h-24 md:h-32 lg:h-40 w-auto object-contain rounded-lg shadow-2xl"
-                  />
+                  <div className="relative">
+                    {/* Logo container with glow effect */}
+                    <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full animate-pulse"></div>
+                    <img 
+                      src="/images/logo.png" 
+                      alt="Bitcoin Logo" 
+                      className="relative h-32 sm:h-40 md:h-48 lg:h-56 w-auto object-contain drop-shadow-2xl"
+                    />
+                  </div>
                 </div>
                 
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent mb-4 animate-pulse">
@@ -278,8 +251,8 @@ export default function BitcoinPresentation() {
               <div className="flex justify-center mb-2">
                 <img 
                   src="/images/logo.png" 
-                  alt="Logo" 
-                  className="h-10 sm:h-12 md:h-16 w-auto object-contain rounded-lg shadow-lg"
+                  alt="Bitcoin Logo" 
+                  className="h-12 sm:h-16 md:h-20 w-auto object-contain"
                 />
               </div>
 
@@ -361,8 +334,8 @@ export default function BitcoinPresentation() {
               <div className="flex justify-center mb-1 sm:mb-2">
                 <img 
                   src="/images/logo.png" 
-                  alt="Logo" 
-                  className="h-10 sm:h-12 md:h-16 w-auto object-contain rounded-lg shadow-lg"
+                  alt="Bitcoin Logo" 
+                  className="h-12 sm:h-16 md:h-20 w-auto object-contain"
                 />
               </div>
 
@@ -447,7 +420,7 @@ export default function BitcoinPresentation() {
                         idx < visibleNodes ? 'w-6 bg-gradient-to-r from-amber-500 to-yellow-500' : 'w-1.5 bg-amber-500/30'
                       }`}
                     />
-                ))}
+                  ))}
                 </div>
                 <p className="text-center text-xs text-amber-300/70">
                   {visibleNodes} of {nodes.length} nodes
@@ -461,11 +434,14 @@ export default function BitcoinPresentation() {
             <div className="flex flex-col items-center justify-center min-h-[500px] sm:min-h-[600px] transition-opacity duration-500">
               <div className="text-center space-y-6 sm:space-y-8">
                 <div className="flex justify-center mb-6 sm:mb-8">
-                  <img 
-                    src="/images/logo.png" 
-                    alt="Logo" 
-                    className="h-20 sm:h-24 md:h-32 lg:h-40 w-auto object-contain rounded-lg shadow-2xl"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full animate-pulse"></div>
+                    <img 
+                      src="/images/logo.png" 
+                      alt="Bitcoin Logo" 
+                      className="relative h-32 sm:h-40 md:h-48 lg:h-56 w-auto object-contain drop-shadow-2xl"
+                    />
+                  </div>
                 </div>
                 
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent mb-4">
@@ -549,7 +525,7 @@ export default function BitcoinPresentation() {
           {/* Right Arrow */}
           <button
             onClick={() => goToSlide(currentSlide < 3 ? currentSlide + 1 : 0)}
-            className="p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-full border-2 border-amber-500/50 hover:border-amber-400 transition-all duration-300 shadow-lg hover:shadow-amber-500/30 transform hover:scale-110 active:scale-95"
+            className="p-4 bg-slate-800/80 hover:bg-slåate-700/80 rounded-full border-2 border-amber-500/50 hover:border-amber-400 transition-all duration-300 shadow-lg hover:shadow-amber-500/30 transform hover:scale-110 active:scale-95"
             aria-label="Next Slide"
           >
             <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
